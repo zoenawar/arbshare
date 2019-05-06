@@ -1,0 +1,5 @@
+apiKey: ""
+secretKey: ""
+
+targetCoin: 'USDC'
+routeCoins: ['BTC', 'XLM']
