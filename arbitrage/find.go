@@ -39,15 +39,16 @@ func ComposePaths(targetCoin string, routeCoins []string) [][]string {
 	var paths [][]string
 	for i := 0; i < len(routeCoins); i++ {
 		route := routeCoins[i]
-		path := []string{targetCoin, route}
+		path := []string{route + targetCoin}
 		for j := 0; j < len(routeCoins); j++ {
 			fullPath := path
 			if routeCoins[j] != route {
-				fullPath = append(fullPath, routeCoins[j])
+				fullPath = append(fullPath, routeCoins[j] + route, routeCoins[j] + targetCoin)
 				paths = append(paths, fullPath)
 			}
 		}
 	}
+    fmt.Println(paths)
 	return paths
 }
 
