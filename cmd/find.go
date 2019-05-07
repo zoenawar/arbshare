@@ -28,7 +28,9 @@ var findCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("find called")
-		arbitrage.ComposePaths(viper.GetString("targetCoin"), viper.GetStringSlice("routeCoins"))
+		client := arbitrage.InitClient()
+		paths := arbitrage.ComposePaths(viper.GetString("targetCoin"), viper.GetStringSlice("routeCoins"))
+		arbitrage.CompareSymbols(paths[0], client)
 	},
 }
 

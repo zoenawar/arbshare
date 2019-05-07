@@ -1,13 +1,14 @@
 package arbitrage
 
 import (
+	"context"
 	"fmt"
 	"github.com/adshao/go-binance"
 	"os"
 	"time"
 )
 
-func FetchDepth(symbols []string) {
+func WsFetchDepth(symbols []string) {
 	var latestAsks []binance.Ask
 	wsPartialDepthHandler := func(event *binance.WsPartialDepthEvent) {
 		fmt.Println(event.Symbol, event.Asks)
@@ -43,17 +44,17 @@ func ComposePaths(targetCoin string, routeCoins []string) [][]string {
 		for j := 0; j < len(routeCoins); j++ {
 			fullPath := path
 			if routeCoins[j] != route {
-				fullPath = append(fullPath, routeCoins[j] + route, routeCoins[j] + targetCoin)
+				fullPath = append(fullPath, routeCoins[j]+route, routeCoins[j]+targetCoin)
 				paths = append(paths, fullPath)
 			}
 		}
 	}
-    fmt.Println(paths)
+	fmt.Println(paths)
 	return paths
 }
 
-/*
-func CompareSymbols(a binance.Ask, b binance.Ask, c binance.Ask) {
-
+func CompareSymbols(path []string, client *binance.Client) {
+	a, _ := client.NewDepthService().Symbol(path[0]).Do(context.Background())
+	b, _ := client.NewDepthService().Symbol(path[0]).Do(context.Background())
+	c, _ := client.NewDepthService().Symbol(path[0]).Do(context.Background())
 }
-*/
