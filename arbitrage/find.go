@@ -1,18 +1,20 @@
 package arbitrage
 
 import (
-	"context"
 	"fmt"
 	"github.com/adshao/go-binance"
 	"os"
 	"time"
 )
 
-func WsFetchDepth(symbols []string) {
+func WsFetchDepth(symbols []string, out chan<- *binance.WsPartialDepthEvent) {
 	var latestAsks []binance.Ask
 	wsPartialDepthHandler := func(event *binance.WsPartialDepthEvent) {
-		fmt.Println(event.Symbol, event.Asks)
 		latestAsks = event.Asks
+        if len(latestAsks) > 0 {
+            fmt.Println("Event processed", event.Symbol)
+            out <- event
+        }
 	}
 	errHandler := func(err error) {
 		fmt.Println(err)
@@ -54,7 +56,35 @@ func ComposePaths(targetCoin string, routeCoins []string) [][]string {
 }
 
 func CompareSymbols(path []string, client *binance.Client) {
-	a, _ := client.NewDepthService().Symbol(path[0]).Do(context.Background())
-	b, _ := client.NewDepthService().Symbol(path[0]).Do(context.Background())
-	c, _ := client.NewDepthService().Symbol(path[0]).Do(context.Background())
+    var a, b, c binance.Ask
+    results := make(chan *binance.WsPartialDepthEvent, 1)
+    done := make(chan struct{})
+    eventC := make(chan struct{})
+    go func() {
+        WsFetchDepth(path, results)
+    }()
+
+    go func() {
+        for event := range results {
+            switch event.Symbol {
+            case path[0]:
+                a = event.Asks[0]
+            case path[1]:
+                b = event.Asks[0]
+            case path[2]:
+                c = event.Asks[0]
+            }
+            eventC <- struct{}{}
+        }
+    }()
+
+    go func() {
+        for range eventC {
+            fmt.Println(path[0], a)
+            fmt.Println(path[1], b)
+            fmt.Println(path[2], c)
+        }
+    }()
+
+    <-done
 }
