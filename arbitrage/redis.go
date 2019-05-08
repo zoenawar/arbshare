@@ -3,6 +3,7 @@ package arbitrage
 import (
 	"encoding/json"
 	"fmt"
+    "strconv"
 	"github.com/adshao/go-binance"
 	"github.com/go-redis/redis"
 	"github.com/spf13/viper"
@@ -44,10 +45,23 @@ func HydrateRedis(symbols []string, client *redis.Client) {
 	<-done
 }
 
-func GetLatestCoinData(symbol string, field string, client *redis.Client) (float, float) {
-    dataMarshalled, _ := client.HGet(symbol, field)
-    dataList, _ := json.Unmarshal(dataMarshalled)
-    coinPrice := strconv.ParseFloat(dataList[0]['Price'])
-    coinQuantity := strconv.ParseFloat(dataList[0]['Volume'])
+func GetLatestCoinData(symbol string, field string, client *redis.Client) (float64, float64) {
+    dataMarshalled, _ := client.HGet(symbol, field).Result()
+
+    //Temporary type for holding Ask/Bid data
+    type Data struct {
+        Price string
+        Quantity string
+    }
+
+    dataList := make([]Data, 1)
+    err := json.Unmarshal([]byte(dataMarshalled), &dataList)
+    if err != nil {
+        fmt.Println(err)
+    }
+
+    coinPrice, _ := strconv.ParseFloat(dataList[0].Price, 64)
+    coinQuantity, _ := strconv.ParseFloat(dataList[0].Quantity, 64)
+
     return coinPrice, coinQuantity
 }
