@@ -1,5 +1,8 @@
 apiKey: ""
 secretKey: ""
 
+redisAddr: "localhost:6379"
+redisPass: ""
+
 targetCoin: 'USDC'
 routeCoins: ['BTC', 'XLM']
