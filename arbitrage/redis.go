@@ -43,3 +43,11 @@ func HydrateRedis(symbols []string, client *redis.Client) {
 
 	<-done
 }
+
+func GetLatestCoinData(symbol string, field string, client *redis.Client) (float, float) {
+    dataMarshalled, _ := client.HGet(symbol, field)
+    dataList, _ := json.Unmarshal(dataMarshalled)
+    coinPrice := strconv.ParseFloat(dataList[0]['Price'])
+    coinQuantity := strconv.ParseFloat(dataList[0]['Volume'])
+    return coinPrice, coinQuantity
+}
